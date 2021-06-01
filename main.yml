@@ -1,0 +1,57 @@
+---
+  - name: Deploy Wordpress to AWS Ubuntu Linux
+    hosts: all
+    become: yes
+    remote_user: brm
+    vars_files:
+    - vars/main.yml
+
+    tasks:
+    - name: Update System
+      include_role:
+        name: update_system
+      
+    - name: Install MySQL
+      include_role:
+        name: install_mysql
+      when: ( "DB_SERVERS" in group_names )
+
+    - name: Install NGINX
+      include_role:
+        name: install_nginx
+      when: ( "WEB" in group_names )
+
+    - name: Install PHP
+      include_role:
+        name: install_php
+      when: ( "WEB" in group_names )
+
+    - name: Install WordPress
+      include_role:
+        name: install_wordpress
+      when: ( "WEB" in group_names )
+
+    - name: Config DB Masters
+      include_role:
+        name: config_mysql
+      when: ( "DB_MASTERS" in group_names )
+
+    - name: Config DB Slaves
+      include_role:
+        name: config_mysql
+      when: ( "DB_SLAVES" in group_names )
+
+    - name: Config NGINX
+      include_role:
+        name: config_nginx
+      when: ( "WEB" in group_names )
+
+    - name: Config WordPress
+      include_role:
+        name: config_wordpress
+      when: ( "WEB" in group_names )
+
+    - name: Config SSL
+      include_role:
+        name: config_ssl
+      when: ( "WEB" in group_names )

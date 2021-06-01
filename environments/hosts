@@ -1,0 +1,12 @@
+[WEB]
+webserver ansible_host=192.168.1.165
+
+[DB_MASTERS]
+dbmaster1 ansible_host=192.168.1.167
+
+[DB_SLAVES]
+dbslave1 ansible_host=192.168.1.168
+
+[DB_SERVERS:children]
+DB_MASTERS
+DB_SLAVES

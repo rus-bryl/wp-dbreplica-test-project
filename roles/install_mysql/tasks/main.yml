@@ -1,0 +1,7 @@
+---
+# tasks file for install_mysql
+- name: Install Mysql-Server
+  apt: name=mysql-server update_cache=yes state=latest
+
+- name: Start mysql
+  systemd: name=mysql state=started

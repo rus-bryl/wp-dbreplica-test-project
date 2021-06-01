@@ -1,0 +1,13 @@
+---
+  - name: Connection test
+    hosts: all
+    become: yes
+    remote_user: brm
+    vars_files:
+    - vars/main.yml
+
+    tasks:
+
+    - name: test1
+      ping:
+      when: ( "DB_MASTERS" in group_names )

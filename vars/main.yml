@@ -1,0 +1,11 @@
+---
+#MySQL Settings
+mysql_root_password: "mysqlpassword"
+mysql_db: "wordpress"
+mysql_user: "wpuser"
+mysql_password: "wppassword"
+
+#HTTP Settings
+http_host: "brm.smn.com.ua"
+http_conf: "your_domain.conf"
+http_port: "80"

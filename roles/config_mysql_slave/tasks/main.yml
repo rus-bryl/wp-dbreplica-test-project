@@ -1,0 +1,50 @@
+---
+# tasks file for config_mysql
+
+- name: Site config
+  template:
+    src: "my.cnf.j2"
+    dest: "/etc/mysql/conf.d/mysql.cnf"
+  notify: Restart MySQL
+
+- name: Restore WordPress DB
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_db }}"
+    state: import
+    target: /tmp/dump.sql
+  notify: Restart MySQL
+
+- name: Stop Replication
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: stopslave  
+
+- name: Configure Replication
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: changemaster
+    master_host: "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
+    master_user: "{{ mysql_replica_user }}"
+    master_password: "{{ mysql_replica_password }}"
+    master_log_file: "{{ hostvars[groups['db_masters'][0]].master.File }}"
+    master_log_pos: "{{ hostvars[groups['db_masters'][0]].master.Position }}"
+  ignore_errors: true
+
+- name: look for vars
+  debug:
+    msg: 
+      - "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
+      - "{{ hostvars[groups['db_masters'][0]].master.File }}"
+      - "{{ hostvars[groups['db_masters'][0]].master.Position }}"
+
+
+- name: Start Replication
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: startslave
+

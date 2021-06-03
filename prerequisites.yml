@@ -1,0 +1,4 @@
+---
+#- name: Install prerequisites
+  roles:
+    - update_system

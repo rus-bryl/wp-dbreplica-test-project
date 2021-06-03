@@ -1,0 +1,52 @@
+---
+# tasks file for config_mysql_masters
+- name: Creates database for WordPress
+  mysql_db:
+    name: "{{ mysql_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: [ mysql ]
+
+- name: Create MySQL user for Replication
+  mysql_user:
+    name: "{{ mysql_replica_user }}"
+    password: "{{ mysql_replica_password }}"
+    priv: "*.*:REPLICATION SLAVE,REPLICATION CLIENT"
+    host: "{{ hostvars[groups['db_slaves'][0]].ansible_default_ipv4.address }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  tags: [ mysql ]
+
+- name: Site config
+  template:
+    src: "my.cnf.j2"
+    dest: "/etc/mysql/conf.d/mysql.cnf"
+  notify: Restart MySQL
+
+- name: Dump WordPress DB
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_db }}"
+    state: dump
+    target: /tmp/dump.sql
+
+- name: Copy Dump file to Slave
+  shell: scp /tmp/dump.sql "{{ hostvars[groups['db_slaves'][0]].ansible_default_ipv4.address }}":/tmp/dump.sql
+
+
+- name: Get binlog file and position
+  mysql_replication:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    mode: getmaster
+  register: master
+
+- name: look for binlod file and position
+  debug:
+    msg: File- {{ master.File }} and Position- {{ master.Position }}
+#  set_fact:
+#    db_log_filename: "{{ master.File }}"
+#    db_log_position: "{{ master.Position }}"

@@ -4,4 +4,4 @@
 #ansible-playbook -i scripts/ec2.py main.yml
 
 #-----------Deploy to Home Virtual Host---------
-ansible-playbook -i environments/hosts main.yml
+ansible-playbook -i inventory/hosts main.yml

@@ -33,10 +33,6 @@
     state: dump
     target: /tmp/dump.sql
 
-- name: Copy Dump file to Slave
-  shell: scp /tmp/dump.sql "{{ hostvars[groups['db_slaves'][0]].ansible_default_ipv4.address }}":/tmp/dump.sql
-
-
 - name: Get binlog file and position
   mysql_replication:
     login_user: root
@@ -47,6 +43,4 @@
 - name: look for binlod file and position
   debug:
     msg: File- {{ master.File }} and Position- {{ master.Position }}
-#  set_fact:
-#    db_log_filename: "{{ master.File }}"
-#    db_log_position: "{{ master.Position }}"
+

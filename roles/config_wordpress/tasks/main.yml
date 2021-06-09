@@ -24,12 +24,9 @@
   tags: [ wordpress ]
 
 - name: Config HyperDB Plugin
-  copy:
-    src: "db-config.php"
+  template:
+    src: "db-config.php.j2"
     dest: "/var/www/html/wordpress/db-config.php"
-    owner: www-data
-    group: www-data
-    mode: "0640"
   tags: [ wordpress ]
   notify: Reload Nginx
 

@@ -7,6 +7,9 @@
     dest: "/etc/mysql/conf.d/mysql.cnf"
   notify: Restart MySQL
 
+- name: Copy Dump file to Slave
+  shell: scp "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}":/tmp/dump.sql /tmp/dump.sql 
+
 - name: Restore WordPress DB
   mysql_db:
     login_user: root

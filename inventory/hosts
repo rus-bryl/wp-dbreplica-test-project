@@ -11,3 +11,18 @@ dbslave2 ansible_host=192.168.1.172
 [db_servers:children]
 db_masters
 db_slaves
+
+[all:vars]
+#MySQL Settings
+mysql_root_password="mysqlpassword"
+mysql_db="wordpress"
+mysql_wp_user="wpuser"
+mysql_wp_password="wppassword"
+mysql_replica_user="replicauser"
+mysql_replica_password="replicapassword"
+
+
+#HTTP Settings
+http_host="brm.smn.com.ua"
+http_conf="your_domain.conf"
+http_port="80"

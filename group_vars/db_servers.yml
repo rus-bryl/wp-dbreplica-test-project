@@ -1,3 +1,0 @@
----
-mysql_replica_user: "replicauser"
-mysql_replica_password: "replicapassword"

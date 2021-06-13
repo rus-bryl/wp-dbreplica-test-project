@@ -1,3 +1,8 @@
+[mysqld]
 #bind-address = {{ ansible_default_ipv4.address }}
-server-id = {{ ansible_default_ipv4.address.split(".")[3] }}
+server_id = {{ ansible_default_ipv4.address.split(".")[3] }}
 log_bin = /var/log/mysql/mysql-bin.log
+binlog-format = ROW
+gtid_mode = ON
+log-slave-updates = 0
+enforce-gtid-consistency

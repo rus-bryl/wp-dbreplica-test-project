@@ -1,3 +1,5 @@
+[mysqld]
 #bind-address = {{ ansible_default_ipv4.address }}
-server-id = server-id = {{ ansible_default_ipv4.address.split(".")[3] }}
-
+server_id = {{ ansible_default_ipv4.address.split(".")[3] }}
+gtid_mode = ON
+enforce-gtid-consistency

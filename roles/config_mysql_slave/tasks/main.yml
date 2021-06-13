@@ -7,47 +7,89 @@
     dest: "/etc/mysql/conf.d/mysql.cnf"
   notify: Restart MySQL
 
-- name: Copy Dump file to Slave
-  shell: scp "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}":/tmp/dump.sql /tmp/dump.sql 
-
-- name: Restore WordPress DB
-  mysql_db:
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
-    name: "{{ mysql_db }}"
-    state: import
-    target: /tmp/dump.sql
-  notify: Restart MySQL
-
-- name: Stop Replication
+- name: Check Slave Status
   mysql_replication:
     login_user: root
     login_password: "{{ mysql_root_password }}"
-    mode: stopslave  
-
-- name: Configure Replication
-  mysql_replication:
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
-    mode: changemaster
-    master_host: "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
-    master_user: "{{ mysql_replica_user }}"
-    master_password: "{{ mysql_replica_password }}"
-    master_log_file: "{{ hostvars[groups['db_masters'][0]].master.File }}"
-    master_log_pos: "{{ hostvars[groups['db_masters'][0]].master.Position }}"
+    mode: getreplica
   ignore_errors: true
+  register: slave
 
-- name: look for vars
-  debug:
-    msg: 
-      - "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
-      - "{{ hostvars[groups['db_masters'][0]].master.File }}"
-      - "{{ hostvars[groups['db_masters'][0]].master.Position }}"
+- block:  
+
+  - name: Copy Dump file to Slave
+  #  shell: scp "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}":/tmp/dump.sql /tmp/dump.sql 
+    shell: ssh {{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }} "xtrabackup --user=root --password="{{ mysql_root_password }}" --backup --stream=xbstream --target-dir=./" > backup.xbstream 2>backup.log
+
+#- name: Restore WordPress DB
+#  mysql_db:
+#    login_user: root
+#    login_password: "{{ mysql_root_password }}"
+#    name: "{{ mysql_db }}"
+#    state: import
+#    target: /tmp/dump.sql
+#  notify: Restart MySQL
+
+  - name: Stop Replication
+    mysql_replication:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      mode: stopslave
+
+  - name: Stop mysql
+    systemd: name=mysql state=stopped
+
+  - name: Remove mysql direstory
+    file:
+      path: /var/lib/mysql
+      state: absent
+
+  - name: Create mysql direstory
+    file:
+      path: /var/lib/mysql
+      state: directory
+
+  - name: Restore DataBase
+    shell: xbstream -x -C /var/lib/mysql/ < backup.xbstream
+  
+  - name: DB Dir Owner Set
+    file:
+      path: /var/lib/mysql
+      state: directory
+      recurse: yes
+      owner: mysql
+      group: mysql
+    notify: Restart MySQL
+
+  - name: Start mysql
+    systemd: name=mysql state=started
+
+  - name: Configure Replication
+    mysql_replication:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      mode: changemaster
+      master_host: "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
+      master_user: "{{ mysql_replica_user }}"
+      master_password: "{{ mysql_replica_password }}"
+#    master_log_file: "{{ hostvars[groups['db_masters'][0]].master.File }}"
+#    master_log_pos: "{{ hostvars[groups['db_masters'][0]].master.Position }}"
+      master_auto_position: yes
+    ignore_errors: true
+
+#- name: look for vars
+#  debug:
+#    msg: 
+#      - "{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}"
+#      - "{{ hostvars[groups['db_masters'][0]].master.File }}"
+#      - "{{ hostvars[groups['db_masters'][0]].master.Position }}"
 
 
-- name: Start Replication
-  mysql_replication:
-    login_user: root
-    login_password: "{{ mysql_root_password }}"
-    mode: startslave
+  - name: Start Replication
+    mysql_replication:
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      mode: startslave
+  
+  when: slave.Replica_IO_Running != "Yes"
 

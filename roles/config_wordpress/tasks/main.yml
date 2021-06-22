@@ -14,22 +14,6 @@
   tags: [ wordpress ]
   notify: Reload Nginx
 
-- name: Install HyperDB Plugin
-  copy:
-    src: "db.php"
-    dest: "/var/www/html/wordpress/db.php"
-    owner: www-data
-    group: www-data
-    mode: "0640"
-  tags: [ wordpress ]
-
-- name: Config HyperDB Plugin
-  template:
-    src: "db-config.php.j2"
-    dest: "/var/www/html/wordpress/db-config.php"
-  tags: [ wordpress ]
-  notify: Reload Nginx
-
 - name: Set up wp-config
   template:
     src: "wp-config.php.j2"

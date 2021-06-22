@@ -1,6 +1,9 @@
 [webservers]
 webserver ansible_host=192.168.1.165
 
+[proxysql]
+webserver ansible_host=192.168.1.165
+
 [db_masters]
 dbmaster1 ansible_host=192.168.1.167
 
@@ -13,7 +16,7 @@ db_masters
 db_slaves
 
 [all:vars]
-#MySQL Settings
+# MySQL Settings
 mysql_root_password="mysqlpassword"
 mysql_db="wordpress"
 mysql_wp_user="wpuser"
@@ -21,8 +24,10 @@ mysql_wp_password="wppassword"
 mysql_replica_user="replicauser"
 mysql_replica_password="replicapassword"
 
+# ProxySQL Settings
+proxysql_admin_password="proxyadminpassword"
 
-#HTTP Settings
+# HTTP Settings
 http_host="brm.smn.com.ua"
 http_conf="your_domain.conf"
 http_port="80"

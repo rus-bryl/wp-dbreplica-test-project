@@ -29,6 +29,21 @@
   roles:
   - config_mysql_slave
 
+- name: Install ProxySQL
+  hosts: proxysql
+  become: yes
+  roles:
+  - install_proxysql
+  tags: proxysql
+
+- name: Config ProxySQL
+  hosts: proxysql
+  become: yes
+  roles:
+  - config_proxysql
+  tags: proxysql
+
+
 - name: Install Webserver
   hosts: webservers
   become: yes

@@ -29,10 +29,14 @@ define( 'DB_USER', '{{ mysql_wp_user }}' );
 define( 'DB_PASSWORD', '{{ mysql_wp_password }}' );
 
 /** MySQL hostname */
+define( 'DB_HOST', '{{ hostvars[groups['proxysql'][0]].ansible_default_ipv4.address }}:6033' );
+
+/**
 define( 'DB_HOST', '{{ hostvars[groups['db_masters'][0]].ansible_default_ipv4.address }}' );
 {% for i in groups['db_slaves']%}
 define( 'DB_SLAVE_{{ i }}', '{{ hostvars[i].ansible_default_ipv4.address }}' );
 {%endfor%}
+*/
 
 /** Database Charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
